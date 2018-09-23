@@ -470,6 +470,7 @@ namespace FunctionParser
         public Expression(string expr, string[] ids, ParsTreeNode parent)
             : base(expr, ids, parent)
         {
+            expr=expr.Replace(" ", "");
             int oprIndx = -1;
             int brackets = 0;
             for (int i = expr.Length - 1; i > 0; i--)
