@@ -170,10 +170,11 @@ namespace FunctionParser
     {
         public enum FactorExpansion
         {
-            Number,
-            Function,
-            WrappedExpression,
-            ID
+            Number,//1,2,3,etc
+            Function,//sin,cos,etc
+            MinuFactor,//-x,-15,-sin,-(x+1),etc
+            WrappedExpression,//(expression)
+            ID//x
         }
         public static bool IsFactor(string factor, string[] ids)
         {
@@ -182,11 +183,13 @@ namespace FunctionParser
                 return true;
             else if (factor.StartsWith("(") && factor.EndsWith(")") && Expression.IsExpression(factor.Substring(1, factor.Length - 2), ids))
                 return true;
+            else if (factor.StartsWith("-") && Factor.IsFactor(factor.Substring(1, factor.Length - 1), ids))
+                return true;
             else if (FunctionParser.Function.IsFunction(factor, ids))
                 return true;
             else if (IsID(factor, ids))
                 return true;
-            else {  return false; }
+            else { return false; }
         }
         private static bool IsID(string id, string[] ids)
         {
@@ -203,6 +206,7 @@ namespace FunctionParser
         public FactorExpansion Expansion { get; set; }
         public Function Function { get; set; }
         public Expression WrappedExpression { get; set; }
+        public Factor InnerFactor;
         public Factor(string factor, string[] ids, ParsTreeNode parent)
             : base(factor, ids, parent)
         {
@@ -227,6 +231,11 @@ namespace FunctionParser
                     this.Function = new Function(factor, ids, this);
 
                 }
+                else if(factor.StartsWith("-"))
+                {
+                    this.Expansion = FactorExpansion.MinuFactor;
+                    this.InnerFactor = new Factor(factor.Substring(1, factor.Length - 1), ids, this);
+                }
                 else
                 {
                     this.Expansion = FactorExpansion.ID;
@@ -248,6 +257,10 @@ namespace FunctionParser
             {
                 return (this.Function.CalculateValue(idsValue));
             }
+            else if(Expansion== FactorExpansion.MinuFactor)
+            {
+                return -this.InnerFactor.CalculateValue(idsValue);
+            }
             else
             {
                 //ID
@@ -264,7 +277,6 @@ namespace FunctionParser
         }
         public override double[] CalculateValue(string[] ids, double[][] idsValues)
         {
-
             if (Expansion == FactorExpansion.Number)
             {
                 double[] ret = new double[idsValues.Length];
@@ -280,6 +292,13 @@ namespace FunctionParser
             else if (Expansion == FactorExpansion.Function)
             {
                 return (this.Function.CalculateValue(ids, idsValues));
+            }
+            else if(Expansion== FactorExpansion.MinuFactor)
+            {
+                double[] result = this.InnerFactor.CalculateValue(ids, idsValues);
+                for (int i = 0; i < result.Length; i++)
+                    result[i] = -result[i];
+                return result;
             }
             else
             {
@@ -444,7 +463,8 @@ namespace FunctionParser
             int brackets = 0;
             for (int i = expr.Length - 1; i > 0; i--)
             {
-                if ((expr[i] == '-' || expr[i] == '+') && (brackets == 0))
+                if (((expr[i] == '-'&&!IsOperator(expr[i-1]))
+                    || expr[i] == '+') && (brackets == 0))
                 {
                     oprIndx = i;
                     break;
@@ -464,6 +484,10 @@ namespace FunctionParser
                 return FunctionParser.Term.IsTerm(expr, ids);
             }
         }
+        static bool IsOperator(char c)
+        {
+            return c == '-' || c == '+' || c == '*' || c == '/' || c == '^';
+        }
         public ExpressionExpansion Expansion { get; set; }
         public Term Term { get; set; }
         public Expression SubExpression { get; set; }
@@ -475,7 +499,8 @@ namespace FunctionParser
             int brackets = 0;
             for (int i = expr.Length - 1; i > 0; i--)
             {
-                if ((expr[i] == '-' || expr[i] == '+') && (brackets == 0))
+                if (((expr[i] == '-' && !IsOperator(expr[i - 1]))
+                    || expr[i] == '+') && (brackets == 0))
                 {
                     oprIndx = i;
                     break;

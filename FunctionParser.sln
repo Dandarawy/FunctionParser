@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionParser", "FunctionP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionParserWindowsFormTester", "FunctionParserWindowsFormTester\FunctionParserWindowsFormTester.csproj", "{3F4D032D-2548-4E36-AD17-0BA72215A9AD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionPlotter", "FunctionPlotter\FunctionPlotter.csproj", "{2D5FA28F-AFFB-4A6E-9CE2-A61DBC6BB245}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FunctionParserAndPlotterTester", "FunctionParserAndPlotterTester\FunctionParserAndPlotterTester.csproj", "{E3082C48-B7BF-4A22-AF1A-DA9C20C734D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{3F4D032D-2548-4E36-AD17-0BA72215A9AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F4D032D-2548-4E36-AD17-0BA72215A9AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F4D032D-2548-4E36-AD17-0BA72215A9AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D5FA28F-AFFB-4A6E-9CE2-A61DBC6BB245}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D5FA28F-AFFB-4A6E-9CE2-A61DBC6BB245}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D5FA28F-AFFB-4A6E-9CE2-A61DBC6BB245}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D5FA28F-AFFB-4A6E-9CE2-A61DBC6BB245}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3082C48-B7BF-4A22-AF1A-DA9C20C734D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3082C48-B7BF-4A22-AF1A-DA9C20C734D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3082C48-B7BF-4A22-AF1A-DA9C20C734D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3082C48-B7BF-4A22-AF1A-DA9C20C734D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
