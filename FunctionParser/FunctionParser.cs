@@ -37,6 +37,7 @@ namespace FunctionParser
 
                     Func = (FunctionEnum)Enum.Parse(typeof(FunctionEnum), func);
                     this.Term = new Term(function.Substring(func.Length), ids, this);
+                    break;
                 }
             }
         }

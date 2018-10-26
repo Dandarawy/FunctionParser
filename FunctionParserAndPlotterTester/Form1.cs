@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Windows.Forms;
 using FunctionPlotter;
 using FunctionParser;
-using System.Diagnostics;
 
 namespace FunctionParserAndPlotterTester
 {
@@ -61,7 +60,6 @@ namespace FunctionParserAndPlotterTester
                     for (float x = 0; x >= plotter.GetMinX(); x -= resolution)
                     {
                         PointF point = new PointF(x, (float)graphs[i].Expression.CalculateValue(new double[] { x }));
-                        Debug.WriteLine(point);
                         graphs[i].Curve.Points.Add(point);
                     }
                     graphs[i].Curve.Points.Reverse();
