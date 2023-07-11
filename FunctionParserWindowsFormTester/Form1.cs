@@ -110,33 +110,49 @@ namespace FunctionParserWindowsFormTester
             }
             else if (parseNode is Factor)
             {
-                Factor factor = parseNode as Factor;
-                switch (factor.Expansion)
+                try
                 {
-                    case Factor.FactorExpansion.Number:
-                        TreeNode number = new TreeNode("Number: " + factor.Value);
-                        treeViewNode.Nodes.Add(number);
-                        break;
-                    case Factor.FactorExpansion.ID:
-                        TreeNode id = new TreeNode("ID: " + factor.Value);
-                        treeViewNode.Nodes.Add(id);
-                        break;
-                    case Factor.FactorExpansion.WrappedExpression:
-                        treeViewNode.Nodes.Add("(");
-                        TreeNode expr = new TreeNode("Expression:" + factor.WrappedExpression.Value);
-                        expr.Tag = factor.WrappedExpression;
-                        CreateTreeNodes(factor.WrappedExpression, expr);
-                        treeViewNode.Nodes.Add(expr);
-                        treeViewNode.Nodes.Add(")");
-                        break;
-                    case Factor.FactorExpansion.Function:
-                        treeViewNode.Nodes.Add("Function: " + factor.Function.Func.ToString());
-                        TreeNode term = new TreeNode("Term: " + factor.Function.Term.Value);
-                        term.Tag = factor.Function.Term;
-                        CreateTreeNodes(factor.Function.Term, term);
-                        treeViewNode.Nodes.Add(term);
-                        break;
+                    Factor factor = parseNode as Factor;
+                    switch (factor.Expansion)
+                    {
+                        case Factor.FactorExpansion.Number:
+                            TreeNode number = new TreeNode("Number: " + factor.Value);
+                            treeViewNode.Nodes.Add(number);
+                            break;
+                        case Factor.FactorExpansion.ID:
+                            TreeNode id = new TreeNode("ID: " + factor.Value);
+                            treeViewNode.Nodes.Add(id);
+                            break;
+                        case Factor.FactorExpansion.WrappedExpression:
+                            treeViewNode.Nodes.Add("(");
+                            TreeNode expr = new TreeNode("Expression:" + factor.WrappedExpression.Value);
+                            expr.Tag = factor.WrappedExpression;
+                            CreateTreeNodes(factor.WrappedExpression, expr);
+                            treeViewNode.Nodes.Add(expr);
+                            treeViewNode.Nodes.Add(")");
+                            break;
+                        case Factor.FactorExpansion.Function:
+                            treeViewNode.Nodes.Add("Function: " + factor.Function.Func.ToString());
+                            TreeNode term = new TreeNode("Term: " + factor.Function.Term.Value);
+                            term.Tag = factor.Function.Term;
+                            CreateTreeNodes(factor.Function.Term, term);
+                            treeViewNode.Nodes.Add(term);
+                            break;
+                        case Factor.FactorExpansion.PowExpression:
+                            TreeNode subTerm3 = new TreeNode("Term: " + factor.InnerSubTerm.Value);
+                            subTerm3.Tag = factor.InnerSubTerm;
+                            CreateTreeNodes(factor.InnerSubTerm, subTerm3);
+                            TreeNode factor3 = new TreeNode("Factor: " + factor.InnerFactor.Value);
+                            factor3.Tag = factor.InnerFactor;
+                            CreateTreeNodes(factor.InnerFactor, factor3);
+
+                            treeViewNode.Nodes.Add(subTerm3);
+                            treeViewNode.Nodes.Add("^");
+                            treeViewNode.Nodes.Add(factor3);
+                            break;
+                    }
                 }
+                catch { }
             }
         }
 

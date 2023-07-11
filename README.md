@@ -1,4 +1,6 @@
 # Function Parser
+[Source Dandarawy/FunctionParser](https://github.com/Dandarawy/FunctionParser)   
+[This fork fix bug with math.pow](https://github.com/Dandarawy/FunctionParser/issues/1)    
 This repo contains 4 different projects: 
 ## 1. FunctionParser:
 A class library to parse and evaluate any mathematical expression.  
