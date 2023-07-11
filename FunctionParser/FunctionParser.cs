@@ -167,6 +167,7 @@ namespace FunctionParser
 
         }
     }
+
     public class Factor : ParsTreeNode
     {
         public enum FactorExpansion
@@ -175,6 +176,7 @@ namespace FunctionParser
             Function,//sin,cos,etc
             MinuFactor,//-x,-15,-sin,-(x+1),etc
             WrappedExpression,//(expression)
+            PowExpression, //(expression)^N, example: (expression)^2, 3,14*(X/1000/2)^2=0,212(X=520) <==> (X/1000/2)^2*3,14=0,212(X=520)
             ID//x
         }
         public static bool IsFactor(string factor, string[] ids)
@@ -207,7 +209,9 @@ namespace FunctionParser
         public FactorExpansion Expansion { get; set; }
         public Function Function { get; set; }
         public Expression WrappedExpression { get; set; }
+
         public Factor InnerFactor;
+        public Term InnerSubTerm;
         public Factor(string factor, string[] ids, ParsTreeNode parent)
             : base(factor, ids, parent)
         {
@@ -221,7 +225,55 @@ namespace FunctionParser
             }
             else
             {
-                if (factor.StartsWith("(") && factor.EndsWith(")"))
+                if (factor.Contains('^'))
+                {
+                    var oprIndx = -1;
+                    var brackets = 0;
+                    var term = this.Value;
+                    for (int i = term.Length - 1; i > 0; i--)
+                    {
+                        if ((term[i] == '^') && (brackets == 0))
+                        {
+                            oprIndx = i;
+                            break;
+                        }
+                        else if (term[i] == ')') brackets++;
+                        else if (term[i] == '(') brackets--;
+                    }
+                    if (oprIndx > 0)
+                    {
+                        string inner_subterm, inner_factor;
+                        char opr = term[oprIndx];
+                        inner_subterm = term.Substring(0, oprIndx);
+                        inner_factor = term.Substring(oprIndx + 1);
+                        this.InnerFactor = new Factor(inner_factor, ids, this);
+                        this.InnerSubTerm = new Term(inner_subterm, ids, this);
+                        this.Expansion = FactorExpansion.PowExpression;
+                    }
+                    else
+                    {
+                        if (factor.StartsWith("(") && factor.EndsWith(")"))
+                        {
+                            this.Expansion = FactorExpansion.WrappedExpression;
+                            this.WrappedExpression = new Expression(factor.Substring(1, factor.Length - 2), ids, this);
+                        }
+                        else if (Function.IsFunction(factor, ids))
+                        {
+                            this.Expansion = FactorExpansion.Function;
+                            this.Function = new Function(factor, ids, this);
+                        }
+                        else if (factor.StartsWith("-"))
+                        {
+                            this.Expansion = FactorExpansion.MinuFactor;
+                            this.InnerFactor = new Factor(factor.Substring(1, factor.Length - 1), ids, this);
+                        }
+                        else
+                        {
+                            this.Expansion = FactorExpansion.ID;
+                        }
+                    }
+                }
+                else if (factor.StartsWith("(") && factor.EndsWith(")"))
                 {
                     this.Expansion = FactorExpansion.WrappedExpression;
                     this.WrappedExpression = new Expression(factor.Substring(1, factor.Length - 2), ids, this);
@@ -230,9 +282,8 @@ namespace FunctionParser
                 {
                     this.Expansion = FactorExpansion.Function;
                     this.Function = new Function(factor, ids, this);
-
                 }
-                else if(factor.StartsWith("-"))
+                else if (factor.StartsWith("-"))
                 {
                     this.Expansion = FactorExpansion.MinuFactor;
                     this.InnerFactor = new Factor(factor.Substring(1, factor.Length - 1), ids, this);
@@ -258,9 +309,13 @@ namespace FunctionParser
             {
                 return (this.Function.CalculateValue(idsValue));
             }
-            else if(Expansion== FactorExpansion.MinuFactor)
+            else if (Expansion == FactorExpansion.MinuFactor)
             {
                 return -this.InnerFactor.CalculateValue(idsValue);
+            }
+            else if (Expansion == FactorExpansion.PowExpression)
+            {
+               return (Math.Pow(InnerSubTerm.CalculateValue(idsValue), InnerFactor.CalculateValue(idsValue)));
             }
             else
             {
@@ -273,7 +328,6 @@ namespace FunctionParser
                         break;
                     }
                 return idsValue[idIndex];
-
             }
         }
         public override double[] CalculateValue(string[] ids, double[][] idsValues)
@@ -362,9 +416,10 @@ namespace FunctionParser
             this.Value = term;
             int oprIndx = -1;
             int brackets = 0;
+            // Сначала ищем * и /
             for (int i = term.Length - 1; i > 0; i--)
             {
-                if ((term[i] == '*' || term[i] == '/' || term[i] == '^') && (brackets == 0))
+                if ((term[i] == '*' || term[i] == '/') && (brackets == 0))
                 {
                     oprIndx = i;
                     break;
@@ -374,7 +429,6 @@ namespace FunctionParser
             }
             if (oprIndx > 0)
             {
-
                 string subterm, factor;
                 char opr = term[oprIndx];
                 subterm = term.Substring(0, oprIndx);
@@ -389,9 +443,40 @@ namespace FunctionParser
                 {
                     this.Expansion = TermExpansion.TermDivFactor;
                 }
-                else
+                else if (opr == '^')
                 {
                     this.Expansion = TermExpansion.TermPowFactor;
+                }
+            }
+            // Потом только ищем возведение в степень ^
+            else if (term.Contains('^'))
+            {
+                oprIndx = -1;
+                brackets = 0;
+                for (int i = term.Length - 1; i > 0; i--)
+                {
+                    if ((term[i] == '^') && (brackets == 0))
+                    {
+                        oprIndx = i;
+                        break;
+                    }
+                    else if (term[i] == ')') brackets++;
+                    else if (term[i] == '(') brackets--;
+                }
+                if (oprIndx > 0)
+                {
+                    string subterm, factor;
+                    char opr = term[oprIndx];
+                    subterm = term.Substring(0, oprIndx);
+                    factor = term.Substring(oprIndx + 1);
+                    this.Factor = new Factor(factor, ids, this);
+                    this.SubTerm = new Term(subterm, ids, this);
+                    if (opr == '^') { this.Expansion = TermExpansion.TermPowFactor; }
+                }
+                else
+                {
+                    this.Expansion = TermExpansion.Factor;
+                    this.Factor = new Factor(term, ids, this);
                 }
             }
             else
@@ -500,8 +585,9 @@ namespace FunctionParser
             int brackets = 0;
             for (int i = expr.Length - 1; i > 0; i--)
             {
-                if (((expr[i] == '-' && !IsOperator(expr[i - 1]))
-                    || expr[i] == '+') && (brackets == 0))
+                if (
+                    ((expr[i] == '-' && !IsOperator(expr[i - 1])) || expr[i] == '+') && (brackets == 0)
+                    )
                 {
                     oprIndx = i;
                     break;
